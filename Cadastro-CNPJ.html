@@ -273,6 +273,22 @@
         </div>
 
         <div class="grid">
+            <div class="info-card">
+                <div class="info-content">
+                    <div class="info-label">CNPJ</div>
+                    <div class="info-value" id="cnpjValor">-</div>
+                </div>
+                <button class="btn-copy" onclick="copiarTexto('cnpjValor', this)">Copiar</button>
+            </div>
+
+            <div class="info-card">
+                <div class="info-content">
+                    <div class="info-label">Situação Cadastral</div>
+                    <div class="info-value" id="situacao">-</div>
+                </div>
+                <button class="btn-copy" onclick="copiarTexto('situacao', this)">Copiar</button>
+            </div>
+
             <div class="info-card full-width">
                 <div class="info-content">
                     <div class="info-label">Razão Social</div>
@@ -291,18 +307,18 @@
 
             <div class="info-card">
                 <div class="info-content">
-                    <div class="info-label">Situação Cadastral</div>
-                    <div class="info-value" id="situacao">-</div>
-                </div>
-                <button class="btn-copy" onclick="copiarTexto('situacao', this)">Copiar</button>
-            </div>
-
-            <div class="info-card">
-                <div class="info-content">
                     <div class="info-label">Inscrição Estadual (I.E.)</div>
                     <div class="info-value" id="inscricaoEstadual">-</div>
                 </div>
                 <button class="btn-copy" onclick="copiarTexto('inscricaoEstadual', this)">Copiar</button>
+            </div>
+
+            <div class="info-card">
+                <div class="info-content">
+                    <div class="info-label">CEP</div>
+                    <div class="info-value" id="cep">-</div>
+                </div>
+                <button class="btn-copy" onclick="copiarTexto('cep', this)">Copiar</button>
             </div>
 
             <div class="info-card full-width">
@@ -319,14 +335,6 @@
                     <div class="info-value" id="endereco">-</div>
                 </div>
                 <button class="btn-copy" onclick="copiarTexto('endereco', this)">Copiar</button>
-            </div>
-
-            <div class="info-card">
-                <div class="info-content">
-                    <div class="info-label">CEP</div>
-                    <div class="info-value" id="cep">-</div>
-                </div>
-                <button class="btn-copy" onclick="copiarTexto('cep', this)">Copiar</button>
             </div>
 
             <div class="info-card">
@@ -352,9 +360,7 @@
     const cnpjInput = document.getElementById('cnpjInput');
     let dadosAtuais = {};
 
-    // Função para formatar CNPJ Alfanumérico (XX.XXX.XXX/XXXX-XX)
     function aplicarMascaraCNPJ(valor) {
-        // Remove tudo que não for número ou letra (A-Z, 0-9) e converte para maiúsculo
         let clean = valor.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         if (clean.length > 14) clean = clean.slice(0, 14);
 
@@ -380,7 +386,6 @@
     });
 
     async function consultarCNPJ() {
-        // Remove pontuações e símbolos para validação e consulta na API
         const rawCnpj = cnpjInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         const errorDiv = document.getElementById('errorMessage');
         const resultsDiv = document.getElementById('results');
@@ -429,7 +434,6 @@
     function processarDadosCnpjWs(data) {
         const est = data.estabelecimento || {};
         
-        // Formatar Endereço
         const rua = [est.tipo_logradouro, est.logradouro].filter(Boolean).join(' ');
         const num = est.numero ? `, Nº ${est.numero}` : '';
         const comp = est.complemento ? ` (${est.complemento})` : '';
@@ -437,7 +441,6 @@
         const cidadeUf = (est.cidade?.nome && est.estado?.sigla) ? `, ${est.cidade.nome}/${est.estado.sigla}` : '';
         const enderecoCompleto = `${rua}${num}${comp}${bairro}${cidadeUf}`.trim() || 'Não informado';
 
-        // Tratar Inscrição Estadual
         let ieTexto = 'Isento / Não cadastrada';
         if (est.inscricoes_estaduais && est.inscricoes_estaduais.length > 0) {
             ieTexto = est.inscricoes_estaduais
@@ -500,6 +503,7 @@
     }
 
     function renderizarResultados() {
+        document.getElementById('cnpjValor').innerText = dadosAtuais.cnpj;
         document.getElementById('razaoSocial').innerText = dadosAtuais.razaoSocial;
         document.getElementById('nomeFantasia').innerText = dadosAtuais.nomeFantasia;
         document.getElementById('inscricaoEstadual').innerText = dadosAtuais.inscricaoEstadual;
@@ -517,7 +521,17 @@
     }
 
     function copiarTexto(elementId, btnElement) {
-        let texto = (elementId === 'situacao') ? dadosAtuais.situacao : document.getElementById(elementId).innerText;
+        let texto = '';
+        if (elementId === 'situacao') {
+            texto = dadosAtuais.situacao;
+        } else {
+            texto = document.getElementById(elementId).innerText;
+        }
+
+        // Se for a Inscrição Estadual, remove a UF entre parênteses "(UF)" e observações "[Inativa]"
+        if (elementId === 'inscricaoEstadual') {
+            texto = texto.replace(/\s*\([^)]*\)/g, '').replace(/\s*\[[^\]]*\]/g, '').trim();
+        }
 
         if (texto && texto !== '-' && texto !== 'Não informado') {
             navigator.clipboard.writeText(texto).then(() => {
@@ -534,12 +548,15 @@
     }
 
     function copiarTudo() {
+        // Limpa a I.E. para o relatório completo também
+        const ieLimpa = dadosAtuais.inscricaoEstadual.replace(/\s*\([^)]*\)/g, '').replace(/\s*\[[^\]]*\]/g, '').trim();
+
         const textoFormatado = `
 CNPJ: ${dadosAtuais.cnpj}
 Razão Social: ${dadosAtuais.razaoSocial}
 Nome Fantasia: ${dadosAtuais.nomeFantasia}
 Situação Cadastral: ${dadosAtuais.situacao}
-I.E.: ${dadosAtuais.inscricaoEstadual}
+I.E.: ${ieLimpa}
 Atividade: ${dadosAtuais.atividade}
 Endereço: ${dadosAtuais.endereco}
 CEP: ${dadosAtuais.cep}
@@ -567,36 +584,6 @@ Telefone: ${dadosAtuais.telefone}
         errorDiv.style.display = 'block';
     }
 </script>
-<!-- Botão Voltar (Canto Inferior Esquerdo) -->
-<a href="./index.html" id="btn-voltar-hub-bottom">
-  &larr; Voltar ao Hub
-</a>
 
-<style>
-  #btn-voltar-hub-bottom {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background-color: #1e293b;
-    color: #38bdf8;
-    border: 1px solid #334155;
-    padding: 10px 18px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transition: all 0.2s ease;
-    z-index: 9999;
-  }
-
-  #btn-voltar-hub-bottom:hover {
-    background-color: #38bdf8;
-    color: #0f172a;
-    border-color: #38bdf8;
-    transform: translateY(-2px);
-  }
-</style>
 </body>
 </html>
