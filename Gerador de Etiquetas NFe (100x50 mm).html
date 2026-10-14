@@ -47,12 +47,41 @@
             font-size: 14px;
         }
 
-        .control-item input[type="number"] {
-            width: 80px;
+        .control-item input[type="number"],
+        .control-item input[type="text"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+        }
+
+        .control-item input[type="number"] {
+            width: 80px;
+        }
+
+        .control-item input[type="text"] {
+            width: 250px;
+        }
+
+        .destinatario-manual-box {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .destinatario-manual-box h3 {
+            margin-top: 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .manual-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .btn-print {
@@ -95,7 +124,6 @@
             overflow: hidden;
         }
 
-        /* Bloco Destinatário / Remetente */
         .bloco {
             font-size: 8pt;
             line-height: 1.15;
@@ -118,7 +146,6 @@
             font-size: 8pt;
         }
 
-        /* Código de barras */
         .barcode-container {
             text-align: center;
             margin-top: -1mm;
@@ -149,7 +176,6 @@
                 margin: 0;
             }
 
-            /* Oculta o painel e o botão de voltar na impressão */
             .no-print,
             #btn-voltar-hub-bottom {
                 display: none !important;
@@ -180,7 +206,7 @@
     <!-- PAINEL DE CONTROLE (Não sai na impressão) -->
     <div class="no-print">
         <h2>Gerador de Etiquetas NFe (100x50 mm)</h2>
-        <p>Selecione os arquivos XML e a quantidade de cópias:</p>
+        <p>Selecione os arquivos XML ou digite o destinatário manualmente:</p>
         
         <div class="control-group">
             <div class="control-item">
@@ -189,21 +215,55 @@
             </div>
 
             <div class="control-item">
-                <label for="copiesInput">Cópias por XML:</label>
+                <label for="copiesInput">Cópias:</label>
                 <input type="number" id="copiesInput" value="1" min="1" max="100">
             </div>
 
             <button class="btn-print" onclick="window.print()">🖨️ Imprimir Etiquetas</button>
+        </div>
+
+        <!-- Opção de Digitação Manual do Destinatário -->
+        <div class="destinatario-manual-box">
+            <h3>Destinatário Manual (Opcional / Sobrescreve ou Adiciona)</h3>
+            <div class="manual-row">
+                <div class="control-item">
+                    <label>Nome:</label>
+                    <input type="text" id="manualNome" placeholder="Nome do Destinatário">
+                </div>
+                <div class="control-item">
+                    <label>Logradouro (Rua/Av):</label>
+                    <input type="text" id="manualLgr" placeholder="Ex: Rua das Flores">
+                </div>
+                <div class="control-item">
+                    <label>Número:</label>
+                    <input type="text" id="manualNro" placeholder="Ex: 123">
+                </div>
+            </div>
+            <div class="manual-row">
+                <div class="control-item">
+                    <label>Complemento:</label>
+                    <input type="text" id="manualCpl" placeholder="Ex: Apto 42">
+                </div>
+                <div class="control-item">
+                    <label>Bairro:</label>
+                    <input type="text" id="manualBairro" placeholder="Nome do Bairro">
+                </div>
+                <div class="control-item">
+                    <label>Cidade / UF:</label>
+                    <input type="text" id="manualMunUF" placeholder="Ex: São Paulo - SP">
+                </div>
+                <div class="control-item">
+                    <label>CEP:</label>
+                    <input type="text" id="manualCep" placeholder="00000-000">
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- ÁREA ONDE AS ETIQUETAS SERÃO GERADAS -->
     <div id="container-etiquetas"></div>
 
-    <!-- Botão Voltar (Canto Inferior Esquerdo) -->
-    <a href="./index.html" id="btn-voltar-hub-bottom">
-      &larr; Voltar ao Hub
-    </a>
+    <a href="./index.html" id="btn-voltar-hub-bottom">&larr; Voltar ao Hub</a>
 
     <style>
       #btn-voltar-hub-bottom {
@@ -223,7 +283,6 @@
         transition: all 0.2s ease;
         z-index: 9999;
       }
-
       #btn-voltar-hub-bottom:hover {
         background-color: #38bdf8;
         color: #0f172a;
@@ -235,8 +294,13 @@
     <script>
         const xmlInput = document.getElementById('xmlInput');
         const copiesInput = document.getElementById('copiesInput');
+        
+        // Inputs manuais
+        const manualInputs = ['manualNome', 'manualLgr', 'manualNro', 'manualCpl', 'manualBairro', 'manualMunUF', 'manualCep'];
+        manualInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', gerarEtiquetas);
+        });
 
-        // Atualiza a visualização se o usuário trocar os arquivos ou alterar a quantidade de cópias
         xmlInput.addEventListener('change', gerarEtiquetas);
         copiesInput.addEventListener('input', gerarEtiquetas);
 
@@ -244,7 +308,37 @@
             const files = xmlInput.files;
             const copies = parseInt(copiesInput.value) || 1;
             const container = document.getElementById('container-etiquetas');
-            container.innerHTML = ''; // Limpa etiquetas anteriores
+            container.innerHTML = ''; 
+
+            // Dados manuais digitados
+            const mNome = document.getElementById('manualNome').value.trim();
+            const mLgr = document.getElementById('manualLgr').value.trim();
+            const mNro = document.getElementById('manualNro').value.trim();
+            const mCpl = document.getElementById('manualCpl').value.trim();
+            const mBairro = document.getElementById('manualBairro').value.trim();
+            const mMunUF = document.getElementById('manualMunUF').value.trim();
+            const mCep = document.getElementById('manualCep').value.trim();
+            const temManual = mNome !== '';
+
+            // Se tem dados manuais e nenhum arquivo XML carregado, gera apenas com os dados manuais
+            if (files.length === 0 && temManual) {
+                for (let c = 0; c < copies; c++) {
+                    const barcodeId = `barcode-manual-${c}`;
+                    renderizarEtiqueta(container, {
+                        nNFFormatted: "000000",
+                        destNome: mNome,
+                        destLgr: mLgr,
+                        destNro: mNro,
+                        destCpl: mCpl,
+                        destBairro: mBairro,
+                        destMunUF: mMunUF,
+                        destCEP: mCep,
+                        emitNome: "EMITENTE NÃO INFORMADO",
+                        emitLgr: "-", emitNro: "", emitCpl: "", emitBairro: "", emitMun: "", emitUF: "", emitCEP: ""
+                    }, barcodeId);
+                }
+                return;
+            }
 
             if (files.length === 0) return;
 
@@ -256,28 +350,34 @@
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-                    // Função auxiliar para buscar tags ignorando namespace
                     const getNodeValue = (parent, tagName) => {
                         const el = parent ? parent.getElementsByTagName(tagName)[0] : null;
                         return el ? el.textContent.trim() : '';
                     };
 
-                    // Extrair Número da NF-e (nNF)
                     let nNF = getNodeValue(xmlDoc, 'nNF') || '000000';
                     let nNFFormatted = nNF.padStart(6, '0');
 
-                    // --- DESTINATÁRIO ---
+                    // --- DESTINATÁRIO (XML ou Manual se preenchido) ---
                     const destNode = xmlDoc.getElementsByTagName('dest')[0];
-                    const destNome = getNodeValue(destNode, 'xNome');
                     const destEnder = destNode ? destNode.getElementsByTagName('enderDest')[0] : null;
                     
-                    const destLgr = getNodeValue(destEnder, 'xLgr');
-                    const destNro = getNodeValue(destEnder, 'nro');
-                    const destCpl = getNodeValue(destEnder, 'xCpl');
-                    const destBairro = getNodeValue(destEnder, 'xBairro');
-                    const destMun = getNodeValue(destEnder, 'xMun');
-                    const destUF = getNodeValue(destEnder, 'UF');
-                    let destCEP = getNodeValue(destEnder, 'CEP');
+                    let destNome = temManual ? mNome : getNodeValue(destNode, 'xNome');
+                    let destLgr = temManual && mLgr ? mLgr : getNodeValue(destEnder, 'xLgr');
+                    let destNro = temManual && mNro ? mNro : getNodeValue(destEnder, 'nro');
+                    let destCpl = temManual && mCpl ? mCpl : getNodeValue(destEnder, 'xCpl');
+                    let destBairro = temManual && mBairro ? mBairro : getNodeValue(destEnder, 'xBairro');
+                    
+                    let destMunUF = '';
+                    if (temManual && mMunUF) {
+                        destMunUF = mMunUF;
+                    } else {
+                        const destMun = getNodeValue(destEnder, 'xMun');
+                        const destUF = getNodeValue(destEnder, 'UF');
+                        destMunUF = `${destMun} - ${destUF}`;
+                    }
+
+                    let destCEP = temManual && mCep ? mCep : getNodeValue(destEnder, 'CEP');
                     if (destCEP.length === 8) {
                         destCEP = destCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
@@ -298,56 +398,71 @@
                         emitCEP = emitCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
 
-                    // Loop para criar o número de cópias solicitado
                     for (let c = 0; c < copies; c++) {
                         const barcodeId = `barcode-${fileIndex}-${c}`;
-
-                        const htmlEtiqueta = `
-                            <div class="etiqueta-wrapper">
-                                <!-- BLOCO DESTINATÁRIO -->
-                                <div class="bloco">
-                                    <div class="titulo">DESTINATÁRIO</div>
-                                    <div class="nome">${destNome}</div>
-                                    <div class="endereco">
-                                        ${destLgr}, nº ${destNro} ${destCpl ? '- ' + destCpl : ''}<br>
-                                        ${destBairro} - ${destMun} - ${destUF}<br>
-                                        Cep: ${destCEP}
-                                    </div>
-                                    <div class="barcode-container">
-                                        <svg id="${barcodeId}"></svg>
-                                    </div>
-                                </div>
-
-                                <div class="linha-divisoria"></div>
-
-                                <!-- BLOCO REMETENTE -->
-                                <div class="bloco">
-                                    <div class="titulo">REMETENTE</div>
-                                    <div class="nome">${emitNome}</div>
-                                    <div class="endereco">
-                                        ${emitLgr}, nº ${emitNro} ${emitCpl ? '- ' + emitCpl : ''}<br>
-                                        ${emitBairro} - ${emitMun} - ${emitUF}<br>
-                                        Cep: ${emitCEP}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        container.insertAdjacentHTML('beforeend', htmlEtiqueta);
-
-                        // Gerar o código de barras
-                        JsBarcode(`#${barcodeId}`, nNFFormatted, {
-                            format: "CODE128",
-                            width: 1.8,
-                            height: 35,
-                            displayValue: true,
-                            fontSize: 10,
-                            margin: 2
-                        });
+                        renderizarEtiqueta(container, {
+                            nNFFormatted,
+                            destNome,
+                            destLgr,
+                            destNro,
+                            destCpl,
+                            destBairro,
+                            destMunUF,
+                            destCEP,
+                            emitNome,
+                            emitLgr,
+                            emitNro,
+                            emitCpl,
+                            emitBairro,
+                            emitMun: `${emitMun} - ${emitUF}`,
+                            emitCEP
+                        }, barcodeId);
                     }
                 };
 
                 reader.readAsText(file);
+            });
+        }
+
+        function renderizarEtiqueta(container, dados, barcodeId) {
+            const htmlEtiqueta = `
+                <div class="etiqueta-wrapper">
+                    <div class="bloco">
+                        <div class="titulo">DESTINATÁRIO</div>
+                        <div class="nome">${dados.destNome}</div>
+                        <div class="endereco">
+                            ${dados.destLgr}, nº ${dados.destNro} ${dados.destCpl ? '- ' + dados.destCpl : ''}<br>
+                            ${dados.destBairro} - ${dados.destMunUF}<br>
+                            Cep: ${dados.destCEP}
+                        </div>
+                        <div class="barcode-container">
+                            <svg id="${barcodeId}"></svg>
+                        </div>
+                    </div>
+
+                    <div class="linha-divisoria"></div>
+
+                    <div class="bloco">
+                        <div class="titulo">REMETENTE</div>
+                        <div class="nome">${dados.emitNome}</div>
+                        <div class="endereco">
+                            ${dados.emitLgr}, nº ${dados.emitNro} ${dados.emitCpl ? '- ' + dados.emitCpl : ''}<br>
+                            ${dados.emitBairro} - ${dados.emitMun}<br>
+                            Cep: ${dados.emitCEP}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', htmlEtiqueta);
+
+            JsBarcode(`#${barcodeId}`, dados.nNFFormatted, {
+                format: "CODE128",
+                width: 1.8,
+                height: 35,
+                displayValue: true,
+                fontSize: 10,
+                margin: 2
             });
         }
     </script>
