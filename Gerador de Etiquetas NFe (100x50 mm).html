@@ -60,7 +60,7 @@
         }
 
         .control-item input[type="text"] {
-            width: 250px;
+            width: 230px;
         }
 
         .destinatario-manual-box {
@@ -222,39 +222,41 @@
             <button class="btn-print" onclick="window.print()">🖨️ Imprimir Etiquetas</button>
         </div>
 
-        <!-- Opção de Digitação Manual do Destinatário -->
+        <!-- Opção de Digitação Manual do Destinatário com Busca CEP -->
         <div class="destinatario-manual-box">
             <h3>Destinatário Manual (Opcional / Sobrescreve ou Adiciona)</h3>
             <div class="manual-row">
                 <div class="control-item">
                     <label>Nome:</label>
-                    <input type="text" id="manualNome" placeholder="Nome do Destinatário">
+                    <input type="text" id="manualNome" placeholder="Nome do Destinatário" style="width: 280px;">
                 </div>
                 <div class="control-item">
-                    <label>Logradouro (Rua/Av):</label>
-                    <input type="text" id="manualLgr" placeholder="Ex: Rua das Flores">
-                </div>
-                <div class="control-item">
-                    <label>Número:</label>
-                    <input type="text" id="manualNro" placeholder="Ex: 123">
+                    <label>CEP:</label>
+                    <input type="text" id="manualCep" placeholder="00000-000" maxlength="9" style="width: 130px;">
                 </div>
             </div>
             <div class="manual-row">
                 <div class="control-item">
-                    <label>Complemento:</label>
-                    <input type="text" id="manualCpl" placeholder="Ex: Apto 42">
+                    <label>Logradouro (Rua/Av):</label>
+                    <input type="text" id="manualLgr" placeholder="Ex: Rua das Flores" style="width: 250px;">
                 </div>
                 <div class="control-item">
+                    <label>Número:</label>
+                    <input type="text" id="manualNro" placeholder="Ex: 123" style="width: 90px;">
+                </div>
+                <div class="control-item">
+                    <label>Complemento:</label>
+                    <input type="text" id="manualCpl" placeholder="Ex: Apto 42" style="width: 120px;">
+                </div>
+            </div>
+            <div class="manual-row">
+                <div class="control-item">
                     <label>Bairro:</label>
-                    <input type="text" id="manualBairro" placeholder="Nome do Bairro">
+                    <input type="text" id="manualBairro" placeholder="Nome do Bairro" style="width: 180px;">
                 </div>
                 <div class="control-item">
                     <label>Cidade / UF:</label>
-                    <input type="text" id="manualMunUF" placeholder="Ex: São Paulo - SP">
-                </div>
-                <div class="control-item">
-                    <label>CEP:</label>
-                    <input type="text" id="manualCep" placeholder="00000-000">
+                    <input type="text" id="manualMunUF" placeholder="Ex: São Paulo - SP" style="width: 180px;">
                 </div>
             </div>
         </div>
@@ -294,9 +296,33 @@
     <script>
         const xmlInput = document.getElementById('xmlInput');
         const copiesInput = document.getElementById('copiesInput');
-        
-        // Inputs manuais
-        const manualInputs = ['manualNome', 'manualLgr', 'manualNro', 'manualCpl', 'manualBairro', 'manualMunUF', 'manualCep'];
+        const manualCepInput = document.getElementById('manualCep');
+
+        // Evento para buscar CEP automaticamente na API ViaCEP
+        manualCepInput.addEventListener('blur', function() {
+            let cepLimpo = manualCepInput.value.replace(/\D/g, '');
+            if (cepLimpo.length === 8) {
+                fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            document.getElementById('manualLgr').value = data.logradouro || '';
+                            document.getElementById('manualBairro').value = data.bairro || '';
+                            document.getElementById('manualMunUF').value = `${data.localidade} - ${data.uf}`;
+                            document.getElementById('manualNro').focus(); // Joga o foco direto no número
+                            gerarEtiquetas();
+                        } else {
+                            alert('CEP não encontrado.');
+                        }
+                    })
+                    .catch(() => {
+                        // Silencia erros de rede para não travar o fluxo
+                    });
+            }
+        });
+
+        // Eventos gerais para atualizar pré-visualização em tempo real
+        const manualInputs = ['manualNome', 'manualCep', 'manualLgr', 'manualNro', 'manualCpl', 'manualBairro', 'manualMunUF'];
         manualInputs.forEach(id => {
             document.getElementById(id).addEventListener('input', gerarEtiquetas);
         });
@@ -310,15 +336,18 @@
             const container = document.getElementById('container-etiquetas');
             container.innerHTML = ''; 
 
-            // Dados manuais digitados
             const mNome = document.getElementById('manualNome').value.trim();
             const mLgr = document.getElementById('manualLgr').value.trim();
             const mNro = document.getElementById('manualNro').value.trim();
             const mCpl = document.getElementById('manualCpl').value.trim();
             const mBairro = document.getElementById('manualBairro').value.trim();
             const mMunUF = document.getElementById('manualMunUF').value.trim();
-            const mCep = document.getElementById('manualCep').value.trim();
-            const temManual = mNome !== '';
+            let mCep = document.getElementById('manualCep').value.trim();
+            if (mCep.length === 8) {
+                mCep = mCep.replace(/^(\d{5})(\d{3})$/, "$1-$2");
+            }
+
+            const temManual = mNome !== '' || mCep !== '' || mLgr !== '';
 
             // Se tem dados manuais e nenhum arquivo XML carregado, gera apenas com os dados manuais
             if (files.length === 0 && temManual) {
@@ -326,7 +355,7 @@
                     const barcodeId = `barcode-manual-${c}`;
                     renderizarEtiqueta(container, {
                         nNFFormatted: "000000",
-                        destNome: mNome,
+                        destNome: mNome || "DESTINATÁRIO",
                         destLgr: mLgr,
                         destNro: mNro,
                         destCpl: mCpl,
@@ -358,18 +387,18 @@
                     let nNF = getNodeValue(xmlDoc, 'nNF') || '000000';
                     let nNFFormatted = nNF.padStart(6, '0');
 
-                    // --- DESTINATÁRIO (XML ou Manual se preenchido) ---
+                    // --- DESTINATÁRIO (XML ou Manual sobrescrevendo) ---
                     const destNode = xmlDoc.getElementsByTagName('dest')[0];
                     const destEnder = destNode ? destNode.getElementsByTagName('enderDest')[0] : null;
                     
-                    let destNome = temManual ? mNome : getNodeValue(destNode, 'xNome');
-                    let destLgr = temManual && mLgr ? mLgr : getNodeValue(destEnder, 'xLgr');
-                    let destNro = temManual && mNro ? mNro : getNodeValue(destEnder, 'nro');
-                    let destCpl = temManual && mCpl ? mCpl : getNodeValue(destEnder, 'xCpl');
-                    let destBairro = temManual && mBairro ? mBairro : getNodeValue(destEnder, 'xBairro');
+                    let destNome = (mNome !== '') ? mNome : getNodeValue(destNode, 'xNome');
+                    let destLgr = (mLgr !== '') ? mLgr : getNodeValue(destEnder, 'xLgr');
+                    let destNro = (mNro !== '') ? mNro : getNodeValue(destEnder, 'nro');
+                    let destCpl = (mCpl !== '') ? mCpl : getNodeValue(destEnder, 'xCpl');
+                    let destBairro = (mBairro !== '') ? mBairro : getNodeValue(destEnder, 'xBairro');
                     
                     let destMunUF = '';
-                    if (temManual && mMunUF) {
+                    if (mMunUF !== '') {
                         destMunUF = mMunUF;
                     } else {
                         const destMun = getNodeValue(destEnder, 'xMun');
@@ -377,7 +406,7 @@
                         destMunUF = `${destMun} - ${destUF}`;
                     }
 
-                    let destCEP = temManual && mCep ? mCep : getNodeValue(destEnder, 'CEP');
+                    let destCEP = (mCep !== '') ? mCep : getNodeValue(destEnder, 'CEP');
                     if (destCEP.length === 8) {
                         destCEP = destCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
