@@ -120,8 +120,14 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            page-break-after: always;
             overflow: hidden;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .etiqueta-wrapper:last-child {
+            break-after: auto;
+            page-break-after: auto;
         }
 
         .bloco {
@@ -170,7 +176,9 @@
                 margin: 0;
             }
 
-            body {
+            html, body {
+                width: 100mm;
+                height: 50mm;
                 background: none;
                 padding: 0;
                 margin: 0;
@@ -183,6 +191,8 @@
 
             #container-etiquetas {
                 display: block;
+                margin: 0;
+                padding: 0;
             }
 
             .etiqueta-wrapper {
@@ -191,8 +201,15 @@
                 height: 50mm;
                 margin: 0;
                 padding: 2mm 4mm;
-                page-break-after: always;
+                break-inside: avoid;
                 page-break-inside: avoid;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .etiqueta-wrapper:last-child {
+                break-after: auto;
+                page-break-after: auto;
             }
 
             .linha-divisoria {
@@ -265,7 +282,7 @@
     <!-- ÁREA ONDE AS ETIQUETAS SERÃO GERADAS -->
     <div id="container-etiquetas"></div>
 
-    <a href="./index.html" id="btn-voltar-hub-bottom">&larr; Voltar ao Hub</a>
+    <a href="./index.html" id="btn-voltar-hub-bottom">← Voltar ao Hub</a>
 
     <style>
       #btn-voltar-hub-bottom {
@@ -298,7 +315,6 @@
         const copiesInput = document.getElementById('copiesInput');
         const manualCepInput = document.getElementById('manualCep');
 
-        // Evento para buscar CEP automaticamente na API ViaCEP
         manualCepInput.addEventListener('blur', function() {
             let cepLimpo = manualCepInput.value.replace(/\D/g, '');
             if (cepLimpo.length === 8) {
@@ -309,19 +325,16 @@
                             document.getElementById('manualLgr').value = data.logradouro || '';
                             document.getElementById('manualBairro').value = data.bairro || '';
                             document.getElementById('manualMunUF').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('manualNro').focus(); // Joga o foco direto no número
+                            document.getElementById('manualNro').focus();
                             gerarEtiquetas();
                         } else {
                             alert('CEP não encontrado.');
                         }
                     })
-                    .catch(() => {
-                        // Silencia erros de rede para não travar o fluxo
-                    });
+                    .catch(() => {});
             }
         });
 
-        // Eventos gerais para atualizar pré-visualização em tempo real
         const manualInputs = ['manualNome', 'manualCep', 'manualLgr', 'manualNro', 'manualCpl', 'manualBairro', 'manualMunUF'];
         manualInputs.forEach(id => {
             document.getElementById(id).addEventListener('input', gerarEtiquetas);
@@ -349,7 +362,6 @@
 
             const temManual = mNome !== '' || mCep !== '' || mLgr !== '';
 
-            // Se tem dados manuais e nenhum arquivo XML carregado, gera apenas com os dados manuais
             if (files.length === 0 && temManual) {
                 for (let c = 0; c < copies; c++) {
                     const barcodeId = `barcode-manual-${c}`;
@@ -387,7 +399,6 @@
                     let nNF = getNodeValue(xmlDoc, 'nNF') || '000000';
                     let nNFFormatted = nNF.padStart(6, '0');
 
-                    // --- DESTINATÁRIO (XML ou Manual sobrescrevendo) ---
                     const destNode = xmlDoc.getElementsByTagName('dest')[0];
                     const destEnder = destNode ? destNode.getElementsByTagName('enderDest')[0] : null;
                     
@@ -411,7 +422,6 @@
                         destCEP = destCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
 
-                    // --- REMETENTE (EMITENTE) ---
                     const emitNode = xmlDoc.getElementsByTagName('emit')[0];
                     const emitNome = getNodeValue(emitNode, 'xNome');
                     const emitEnder = emitNode ? emitNode.getElementsByTagName('enderEmit')[0] : null;
