@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.2 — removido campo Nº do Pedido/NF-E; V2.1: datas de separação e impressão -->
+<!-- Etiqueta-caixa V2.3 — apenas Data de Separação (removida Data de Impressão); V2.2: removido Nº do Pedido/NF-E -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -292,7 +292,7 @@
     padding: 1.5mm;
   }
 
-  /* DATAS: SEPARAÇÃO E IMPRESSÃO (canto superior direito) */
+  /* DATA DE SEPARAÇÃO (canto superior direito) */
   .dates-info {
     font-size: 2.4mm;
     font-weight: bold;
@@ -423,10 +423,6 @@
       <label for="dataSeparacao">Data de separação:</label>
       <input id="dataSeparacao" type="date">
     </div>
-    <div class="campo">
-      <label for="dataImpressao">Data de impressão:</label>
-      <input id="dataImpressao" type="date">
-    </div>
   </div>
 
   <!-- BARRA DE CONTROLE MÚLTIPLA -->
@@ -503,13 +499,10 @@ function fmtData(iso){
 function inicializarDatas(){
   const hoje = hojeISO();
   document.getElementById('dataSeparacao').value = hoje;
-  document.getElementById('dataImpressao').value = hoje;
 }
-/* Lê as datas dos campos no momento da impressão (impressão vazia = hoje) */
-function lerDatas(){
-  const sep = fmtData(document.getElementById('dataSeparacao').value);
-  const imp = fmtData(document.getElementById('dataImpressao').value || hojeISO());
-  return { sep, imp };
+/* Lê a data de separação do campo no momento da impressão */
+function lerDataSeparacao(){
+  return fmtData(document.getElementById('dataSeparacao').value);
 }
 
 function updateSelectedCount() {
@@ -586,7 +579,7 @@ function renderLista(){
 }
 
 function criarEtiqueta(prod, numero, total, qtdPorCaixa){
-  const datas = lerDatas();
+  const dataSep = lerDataSeparacao();
   return `
   <div class="label">
     <div class="top-header">
@@ -598,8 +591,7 @@ function criarEtiqueta(prod, numero, total, qtdPorCaixa){
       <div class="right-header-info">
         <div class="box-info">CAIXA COM ${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
         <div class="dates-info">
-          SEPARAÇÃO: ${datas.sep || '__/__/____'}<br>
-          IMPRESSÃO: ${datas.imp}
+          SEPARAÇÃO: ${dataSep || '__/__/____'}
         </div>
       </div>
     </div>
