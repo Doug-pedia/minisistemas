@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.6 — peso sem variação volta a 12mm (original); "CAIXA COM / NN UNI" 4,5mm; V2.5: SEPARAÇÃO acima, caixa de variação mais baixa; V2.4: "CAIXA COM / NN UNI" em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
+<!-- Etiqueta-caixa V2.7 — peso mais acima (longe do código de barras); sem página em branco ao imprimir; V2.6: peso sem variação volta a 12mm (original); "CAIXA COM / NN UNI" 4,5mm; V2.5: SEPARAÇÃO acima, caixa de variação mais baixa; V2.4: "CAIXA COM / NN UNI" em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -263,8 +263,8 @@
   /* Aumenta o peso quando não há variação */
   .left-tags:not(:has(.variant-box)) .weight-text {
     font-size: 12mm;
-    line-height: 0.85;
-    padding-bottom: 1.8mm; /* afasta o "g" do código de barras */
+    line-height: 0.7;
+    padding-bottom: 3.6mm; /* afasta o "g" do código de barras */
   }
   
   .variant-box {
@@ -358,7 +358,7 @@
       margin: 0 !important;
       padding: 0 !important;
       width: 100mm;
-      height: 50mm;
+      height: auto !important;
     }
     .container {
       display: none !important;
@@ -372,8 +372,14 @@
     }
     .label {
       border: none !important;
+      height: 49.8mm !important; /* margem de segurança: evita estourar para uma 2ª página */
       page-break-after: always !important;
       break-after: page !important;
+    }
+    /* A última etiqueta não força quebra de página (evita página em branco no final) */
+    .print-area .label:last-child {
+      page-break-after: auto !important;
+      break-after: auto !important;
     }
     .highlight-row {
       display: flex !important;
