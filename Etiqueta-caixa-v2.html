@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.5 — SEPARAÇÃO acima e "CAIXA COM / NN UNI" abaixo, maior (5mm); caixa de variação mais baixa; peso sem variação 10mm; V2.4: "CAIXA COM / NN UNI" em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
+<!-- Etiqueta-caixa V2.6 — peso sem variação volta a 12mm (original); "CAIXA COM / NN UNI" 4,5mm; V2.5: SEPARAÇÃO acima, caixa de variação mais baixa; V2.4: "CAIXA COM / NN UNI" em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -230,7 +230,7 @@
     flex-shrink: 0;
   }
   .box-info {
-    font-size: 5mm;
+    font-size: 4.5mm;
     font-weight: 900;
     line-height: 1.1;
     text-align: right;
@@ -262,7 +262,9 @@
   
   /* Aumenta o peso quando não há variação */
   .left-tags:not(:has(.variant-box)) .weight-text {
-    font-size: 10mm;
+    font-size: 12mm;
+    line-height: 0.85;
+    padding-bottom: 1.8mm; /* afasta o "g" do código de barras */
   }
   
   .variant-box {
