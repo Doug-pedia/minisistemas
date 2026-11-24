@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.4 — "CAIXA COM / NN UNI" maior e em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
+<!-- Etiqueta-caixa V2.5 — SEPARAÇÃO acima e "CAIXA COM / NN UNI" abaixo, maior (5mm); caixa de variação mais baixa; peso sem variação 10mm; V2.4: "CAIXA COM / NN UNI" em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -230,7 +230,7 @@
     flex-shrink: 0;
   }
   .box-info {
-    font-size: 4mm;
+    font-size: 5mm;
     font-weight: 900;
     line-height: 1.1;
     text-align: right;
@@ -262,7 +262,7 @@
   
   /* Aumenta o peso quando não há variação */
   .left-tags:not(:has(.variant-box)) .weight-text {
-    font-size: 12mm;
+    font-size: 10mm;
   }
   
   .variant-box {
@@ -270,10 +270,10 @@
     text-align: center;
     background: #000;
     color: #fff;
-    padding: 2mm 1.5mm;
+    padding: 0.8mm 1.5mm;
     font-size: 6.5mm;
     font-weight: 900;
-    line-height: 1.4;
+    line-height: 1.2;
     text-transform: uppercase;
     border-radius: 1mm;
     white-space: normal;
@@ -281,7 +281,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 13mm;
+    min-height: 10mm;
     word-break: break-word;
     max-height: 20mm;
   }
@@ -289,7 +289,7 @@
   .variant-box.long {
     font-size: 4.4mm;
     line-height: 1.15;
-    padding: 1.5mm;
+    padding: 0.8mm 1.5mm;
   }
 
   /* DATA DE SEPARAÇÃO (canto superior direito) */
@@ -391,7 +391,7 @@
       background: #000000 !important;
       color: #ffffff !important;
       border-radius: 1.5mm !important;
-      padding: 2mm 1.5mm !important;
+      padding: 0.8mm 1.5mm !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -400,15 +400,15 @@
       border: 0 !important;
       visibility: visible !important;
       flex: 1 !important;
-      min-height: 13mm !important;
+      min-height: 10mm !important;
       max-height: 20mm !important;
       white-space: normal !important;
       word-break: break-word !important;
-      line-height: 1.4 !important;
+      line-height: 1.2 !important;
     }
     .variant-box.long {
       line-height: 1.15 !important;
-      padding: 1.5mm !important;
+      padding: 0.8mm 1.5mm !important;
     }
   }
 </style>
@@ -589,10 +589,10 @@ function criarEtiqueta(prod, numero, total, qtdPorCaixa){
     <div class="middle-row">
       <div class="prod-name">${prod.nome}</div>
       <div class="right-header-info">
-        <div class="box-info">CAIXA COM<br>${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
         <div class="dates-info">
           SEPARAÇÃO: ${dataSep || '__/__/____'}
         </div>
+        <div class="box-info">CAIXA COM<br>${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
       </div>
     </div>
 
