@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.3 — apenas Data de Separação (removida Data de Impressão); V2.2: removido Nº do Pedido/NF-E -->
+<!-- Etiqueta-caixa V2.4 — "CAIXA COM / NN UNI" maior e em 2 linhas; V2.3: apenas Data de Separação; V2.2: removido Nº do Pedido/NF-E -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -230,7 +230,7 @@
     flex-shrink: 0;
   }
   .box-info {
-    font-size: 3mm;
+    font-size: 4mm;
     font-weight: 900;
     line-height: 1.1;
     text-align: right;
@@ -589,7 +589,7 @@ function criarEtiqueta(prod, numero, total, qtdPorCaixa){
     <div class="middle-row">
       <div class="prod-name">${prod.nome}</div>
       <div class="right-header-info">
-        <div class="box-info">CAIXA COM ${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
+        <div class="box-info">CAIXA COM<br>${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
         <div class="dates-info">
           SEPARAÇÃO: ${dataSep || '__/__/____'}
         </div>
