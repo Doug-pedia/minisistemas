@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Etiqueta-caixa V2.1 — campos Data de Separação e Data de Impressão na etiqueta; caixa de variação ajustada para caber -->
+<!-- Etiqueta-caixa V2.2 — removido campo Nº do Pedido/NF-E; V2.1: datas de separação e impressão -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -229,13 +229,6 @@
     max-width: 48mm;
     flex-shrink: 0;
   }
-  .order-info {
-    font-size: 2.6mm;
-    font-weight: 900;
-    line-height: 1.1;
-    word-break: break-word;
-    text-transform: uppercase;
-  }
   .box-info {
     font-size: 3mm;
     font-weight: 900;
@@ -427,10 +420,6 @@
   
   <div class="pedido-box">
     <div class="campo">
-      <label for="pedido">Nº do Pedido/NF-E (opcional):</label>
-      <input id="pedido" placeholder="Ex.: 000123 ou NF-548">
-    </div>
-    <div class="campo">
       <label for="dataSeparacao">Data de separação:</label>
       <input id="dataSeparacao" type="date">
     </div>
@@ -596,7 +585,7 @@ function renderLista(){
   });
 }
 
-function criarEtiqueta(prod, numero, total, numPedido, qtdPorCaixa){
+function criarEtiqueta(prod, numero, total, qtdPorCaixa){
   const datas = lerDatas();
   return `
   <div class="label">
@@ -607,7 +596,6 @@ function criarEtiqueta(prod, numero, total, numPedido, qtdPorCaixa){
     <div class="middle-row">
       <div class="prod-name">${prod.nome}</div>
       <div class="right-header-info">
-        ${numPedido ? `<div class="order-info">PEDIDO/NF-E: ${numPedido}</div>` : ''}
         <div class="box-info">CAIXA COM ${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
         <div class="dates-info">
           SEPARAÇÃO: ${datas.sep || '__/__/____'}<br>
@@ -640,8 +628,6 @@ function imprimirProduto(index){
   const prod = produtosBase[index];
   const qtdInput = document.getElementById(`qtd-${index}`);
   const qtd = Math.max(1, parseInt(qtdInput.value) || 1);
-  const pedidoInput = document.getElementById('pedido').value.trim();
-
   let qtdPorCaixa = prod.cx;
   if (prod.variavel) {
     const cxInput = document.getElementById(`cx-${index}`);
@@ -652,7 +638,7 @@ function imprimirProduto(index){
 
   let html = '';
   for(let i = 1; i <= qtd; i++){
-    html += criarEtiqueta(prod, i, qtd, pedidoInput, qtdPorCaixa);
+    html += criarEtiqueta(prod, i, qtd, qtdPorCaixa);
   }
 
   const printArea = document.getElementById('printArea');
@@ -666,7 +652,6 @@ function imprimirProduto(index){
 }
 
 function imprimirSelecionados(){
-  const pedidoInput = document.getElementById('pedido').value.trim();
   let temSelecionado = false;
   let todasEtiquetas = [];
 
@@ -685,7 +670,7 @@ function imprimirSelecionados(){
     }
 
     for(let i = 1; i <= qtd; i++){
-      todasEtiquetas.push({prod, i, qtd, pedidoInput, qtdPorCaixa});
+      todasEtiquetas.push({prod, i, qtd, qtdPorCaixa});
     }
     temSelecionado = true;
   });
@@ -705,8 +690,8 @@ function imprimirSelecionados(){
     const fim = Math.min(processadas + CHUNK_SIZE, totalEtiquetas);
     
     for(let i = processadas; i < fim; i++){
-      const {prod, i: numero, qtd, pedidoInput, qtdPorCaixa} = todasEtiquetas[i];
-      htmlGerado += criarEtiqueta(prod, numero, qtd, pedidoInput, qtdPorCaixa);
+      const {prod, i: numero, qtd, qtdPorCaixa} = todasEtiquetas[i];
+      htmlGerado += criarEtiqueta(prod, numero, qtd, qtdPorCaixa);
     }
     
     processadas = fim;
