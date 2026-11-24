@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<!-- Etiqueta-caixa V2.1 — campos Data de Separação e Data de Impressão na etiqueta; caixa de variação ajustada para caber -->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etiquetas ZETEX 100x50mm - Casa do Mel São José</title>
+<style>
+  :root {
+    --gold: #f2ad18;
+    --black: #000;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f2f2f2;
+    color: #000;
+  }
+  .container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #0002;
+  }
+  h1 { margin: 0 0 16px; font-size: 22px; }
+  
+  /* BARRA DE CONTROLE SUPERIOR */
+  .controls-bar {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .controls-bar button {
+    padding: 8px 16px;
+    border: 1px solid #999;
+    border-radius: 6px;
+    background: #f0f0f0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  .controls-bar button:hover {
+    background: #e0e0e0;
+  }
+  .controls-bar button.btn-print-multi {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+  .controls-bar button.btn-print-multi:hover {
+    background: #e09c07;
+    border-color: #e09c07;
+  }
+  .controls-bar .selected-count {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-left: auto;
+  }
+  
+  .pedido-box {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px 20px;
+    flex-wrap: wrap;
+  }
+  .pedido-box .campo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pedido-box label { font-weight: bold; font-size: 14px; }
+  .pedido-box input {
+    padding: 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 220px;
+  }
+  .pedido-box input[type="date"] { width: 150px; }
+  
+  .product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .product-row.selected {
+    background: #fffbf0;
+    border-color: var(--gold);
+  }
+  
+  .product-checkbox {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+    accent-color: var(--gold);
+  }
+  
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .product-title {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  .product-details {
+    font-size: 13px;
+    color: #666;
+  }
+  .product-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .product-controls .control-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .product-controls label {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .product-controls input {
+    width: 65px;
+    padding: 6px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+  }
+  button.btn-print {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--gold);
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button.btn-print:hover {
+    background: #e09c07;
+  }
+
+  /* ETIQUETA INDIVIDUAL ZETEX (100x50mm) - MODELO BARTENDER */
+  .label {
+    width: 100mm;
+    height: 50mm;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 2mm 1mm 2mm 2mm;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    page-break-after: always;
+    break-after: page;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  /* TOPO: MEL SÃO JOSÉ COM LINHA ABAIXO */
+  .top-header {
+    text-align: center;
+    padding-bottom: 0.5mm;
+  }
+  .top-header .brand-title {
+    font-size: 6mm;
+    font-weight: 900;
+    letter-spacing: 0.5mm;
+    line-height: 1;
+    display: inline-block;
+    border-bottom: 0.8mm solid #000;
+    padding-bottom: 0.8mm;
+  }
+
+  /* MEIO CABEÇALHO DA ETIQUETA */
+  .middle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 0.5mm;
+    gap: 2mm;
+  }
+  .prod-name {
+    font-size: 5.5mm;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .right-header-info {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 0.5mm;
+    max-width: 48mm;
+    flex-shrink: 0;
+  }
+  .order-info {
+    font-size: 2.6mm;
+    font-weight: 900;
+    line-height: 1.1;
+    word-break: break-word;
+    text-transform: uppercase;
+  }
+  .box-info {
+    font-size: 3mm;
+    font-weight: 900;
+    line-height: 1.1;
+    text-align: right;
+  }
+
+  /* BLOCO CENTRAL: PESO E VARIEDADE */
+  .highlight-row {
+    display: flex;
+    align-items: stretch;
+    margin-top: 0.5mm;
+    margin-bottom: 0.5mm;
+    flex: 1;
+  }
+  .left-tags {
+    display: flex;
+    align-items: stretch;
+    gap: 2.5mm;
+    width: 100%;
+  }
+  
+  .weight-text {
+    font-size: 8mm;
+    font-weight: 900;
+    line-height: 1;
+    color: #000;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* Aumenta o peso quando não há variação */
+  .left-tags:not(:has(.variant-box)) .weight-text {
+    font-size: 12mm;
+  }
+  
+  .variant-box {
+    flex: 1;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    padding: 2mm 1.5mm;
+    font-size: 6.5mm;
+    font-weight: 900;
+    line-height: 1.4;
+    text-transform: uppercase;
+    border-radius: 1mm;
+    white-space: normal;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 13mm;
+    word-break: break-word;
+    max-height: 20mm;
+  }
+  /* Variações longas: fonte menor para caber em 2 linhas */
+  .variant-box.long {
+    font-size: 4.4mm;
+    line-height: 1.15;
+    padding: 1.5mm;
+  }
+
+  /* DATAS: SEPARAÇÃO E IMPRESSÃO (canto superior direito) */
+  .dates-info {
+    font-size: 2.4mm;
+    font-weight: bold;
+    line-height: 1.15;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* RODAPÉ LAYOUT */
+  .bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .barcode-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .barcode {
+    width: 52mm;
+    height: 7.5mm;
+    display: block;
+  }
+  .barcode-number {
+    font-family: monospace;
+    font-size: 3.8mm;
+    font-weight: bold;
+    letter-spacing: 0.8mm;
+    margin-top: 0.5mm;
+  }
+
+  .sequence-section {
+    text-align: right;
+    padding-bottom: 0.5mm;
+  }
+  .sequence-title {
+    font-size: 2.8mm;
+    font-weight: bold;
+    line-height: 1;
+  }
+  .sequence-number {
+    font-size: 8mm;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 0.5mm;
+  }
+
+  .print-area {
+    display: none;
+  }
+
+  @page {
+    size: 100mm 50mm;
+    margin: 0;
+  }
+
+  @media print {
+    html, body {
+      background: #fff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100mm;
+      height: 50mm;
+    }
+    .container {
+      display: none !important;
+    }
+    .print-area {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .print-area * {
+      visibility: visible !important;
+    }
+    .label {
+      border: none !important;
+      page-break-after: always !important;
+      break-after: page !important;
+    }
+    .highlight-row {
+      display: flex !important;
+      visibility: visible !important;
+    }
+    .left-tags {
+      visibility: visible !important;
+      display: flex !important;
+      width: 100% !important;
+    }
+    .weight-text {
+      visibility: visible !important;
+      display: block !important;
+      color: #000 !important;
+    }
+    .variant-box {
+      background: #000000 !important;
+      color: #ffffff !important;
+      border-radius: 1.5mm !important;
+      padding: 2mm 1.5mm !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      font-weight: 900 !important;
+      border: 0 !important;
+      visibility: visible !important;
+      flex: 1 !important;
+      min-height: 13mm !important;
+      max-height: 20mm !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      line-height: 1.4 !important;
+    }
+    .variant-box.long {
+      line-height: 1.15 !important;
+      padding: 1.5mm !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Etiquetas ZETEX (100x50mm) — Casa do Mel São José</h1>
+  
+  <div class="pedido-box">
+    <div class="campo">
+      <label for="pedido">Nº do Pedido/NF-E (opcional):</label>
+      <input id="pedido" placeholder="Ex.: 000123 ou NF-548">
+    </div>
+    <div class="campo">
+      <label for="dataSeparacao">Data de separação:</label>
+      <input id="dataSeparacao" type="date">
+    </div>
+    <div class="campo">
+      <label for="dataImpressao">Data de impressão:</label>
+      <input id="dataImpressao" type="date">
+    </div>
+  </div>
+
+  <!-- BARRA DE CONTROLE MÚLTIPLA -->
+  <div class="controls-bar">
+    <button onclick="selecionarTodos()">✓ Selecionar Todos</button>
+    <button onclick="desmarcarTodos()">✗ Desmarcar Todos</button>
+    <button class="btn-print-multi" onclick="imprimirSelecionados()">🖨 Imprimir Selecionados</button>
+    <span class="selected-count">Selecionadas: <strong id="countSelected">0</strong></span>
+  </div>
+
+  <div class="product-list" id="productList"></div>
+</div>
+
+<div class="print-area" id="printArea"></div>
+
+<script>
+const produtosBase = [
+  { nome: "EXTRATO DE PRÓPOLIS", variacao: "", peso: "30ml", ean: "7898927765149", cx: 12, variavel: true },
+  { nome: "MEL BISNAGA", variacao: "", peso: "250g", ean: "7898927765040", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "", peso: "350g", ean: "7898927765071", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "", peso: "500g", ean: "7898927765033", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "", peso: "1Kg", ean: "7898927765026", cx: 6 },
+  { nome: "MEL BISNAGA", variacao: "F. Laranjeira", peso: "250g", ean: "7898927765118", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "F. Laranjeira", peso: "500g", ean: "7898927765101", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "F. Laranjeira", peso: "1Kg", ean: "7898927765132", cx: 6 },
+  { nome: "COMPOSTO MEL", variacao: "PRÓP. EUCAL. ROMA", peso: "280g", ean: "7898927765125", cx: 6 },
+  { nome: "SPRAY 35ML MEL", variacao: "PRÓP. GENG. ROMÃ", peso: "", ean: "7898927765194", cx: 12 },
+  { nome: "MEL BISNAGA", variacao: "MELATO DE CANA DE AÇÚCAR", peso: "500g", ean: "7898927765156", cx: 12 }
+];
+
+/* EAN-13: geração em SVG */
+const L = { "0":"0001101","1":"0011001","2":"0010011","3":"0111101","4":"0100011","5":"0110001","6":"0101111","7":"0111011","8":"0110111","9":"0001011" };
+const G = { "0":"0100111","1":"0110011","2":"0011011","3":"0100001","4":"0011101","5":"0111001","6":"0000101","7":"0010001","8":"0001001","9":"0010111" };
+const R = { "0":"1110010","1":"1100110","2":"1101100","3":"1000010","4":"1011100","5":"1001110","6":"1010000","7":"1000100","8":"1001000","9":"1110100" };
+const PARITY = { "0":"LLLLLL","1":"LLGLGG","2":"LLGGLG","3":"LLGGGL","4":"LGLLGG","5":"LGGGLL","6":"LGLGLG","7":"LGLGLG","8":"LGLGGL","9":"LGGLGL" };
+
+/* CACHE DE CÓDIGOS DE BARRAS PARA PERFORMANCE */
+const barcodeCache = {};
+
+function eanSvg(code){
+  code = String(code).replace(/\D/g,'');
+  if(code.length !== 13) return '<svg class="barcode"></svg>';
+  
+  /* Retorna do cache se já foi gerado */
+  if(barcodeCache[code]) return barcodeCache[code];
+  
+  let bits = "101";
+  let p = PARITY[code[0]] || "LLLLLL";
+  for(let i = 1; i <= 6; i++) bits += (p[i-1] === "L" ? L : G)[code[i]];
+  bits += "01010";
+  for(let i = 7; i <= 12; i++) bits += R[code[i]];
+  bits += "101";
+  let w = 2.0, h = 40;
+  let bars = "";
+  for(let i = 0; i < bits.length; i++){
+    if(bits[i] === "1") bars += `<rect x="${i*w}" y="0" width="${w}" height="${h}"/>`;
+  }
+  const svg = `<svg class="barcode" viewBox="0 0 ${bits.length*w} ${h}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
+  
+  /* Armazena em cache para reutilização */
+  barcodeCache[code] = svg;
+  return svg;
+}
+
+/* DATAS: padrão = hoje (data local, sem problema de fuso) */
+function hojeISO(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function fmtData(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
+}
+function inicializarDatas(){
+  const hoje = hojeISO();
+  document.getElementById('dataSeparacao').value = hoje;
+  document.getElementById('dataImpressao').value = hoje;
+}
+/* Lê as datas dos campos no momento da impressão (impressão vazia = hoje) */
+function lerDatas(){
+  const sep = fmtData(document.getElementById('dataSeparacao').value);
+  const imp = fmtData(document.getElementById('dataImpressao').value || hojeISO());
+  return { sep, imp };
+}
+
+function updateSelectedCount() {
+  const count = document.querySelectorAll('.product-checkbox:checked').length;
+  document.getElementById('countSelected').textContent = count;
+}
+
+function marcarCheckbox(index) {
+  const checkbox = document.querySelectorAll('.product-checkbox')[index];
+  const row = checkbox.closest('.product-row');
+  
+  const qtdInput = row.querySelector(`input[id^="qtd-"]`);
+  const qtd = qtdInput.value.trim();
+  
+  if (qtd !== '') {
+    checkbox.checked = true;
+    row.classList.add('selected');
+    updateSelectedCount();
+  }
+}
+
+function selecionarTodos() {
+  document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+    checkbox.checked = true;
+    checkbox.closest('.product-row').classList.add('selected');
+  });
+  updateSelectedCount();
+}
+
+function desmarcarTodos() {
+  document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+    checkbox.checked = false;
+    checkbox.closest('.product-row').classList.remove('selected');
+  });
+  updateSelectedCount();
+}
+
+function renderLista(){
+  const container = document.getElementById('productList');
+  container.innerHTML = '';
+
+  produtosBase.forEach((prod, index) => {
+    const row = document.createElement('div');
+    row.className = 'product-row';
+    
+    const cxInfo = prod.variavel ? 'Quantidade de unidades variável' : `Caixa com ${prod.cx} UNI`;
+    
+    let controlsHtml = `
+      <div class="product-controls">
+        ${prod.variavel ? `
+          <div class="control-group">
+            <label for="cx-${index}">Uni/Cx:</label>
+            <input type="number" id="cx-${index}" placeholder="${prod.cx}" min="1" onchange="marcarCheckbox(${index})">
+          </div>
+        ` : ''}
+        <div class="control-group">
+          <label for="qtd-${index}">Qtd Caixas:</label>
+          <input type="number" id="qtd-${index}" placeholder="1" min="1" onchange="marcarCheckbox(${index})">
+        </div>
+        <button class="btn-print" onclick="imprimirProduto(${index})">🖨 Imprimir</button>
+      </div>
+    `;
+
+    row.innerHTML = `
+      <input type="checkbox" class="product-checkbox" onchange="updateSelectedCount(); this.closest('.product-row').classList.toggle('selected');">
+      <div class="product-info">
+        <div class="product-title">${prod.nome} ${prod.peso} ${prod.variacao ? ' - ' + prod.variacao : ''}</div>
+        <div class="product-details">Cód: ${prod.ean} | ${cxInfo}</div>
+      </div>
+      ${controlsHtml}
+    `;
+    container.appendChild(row);
+  });
+}
+
+function criarEtiqueta(prod, numero, total, numPedido, qtdPorCaixa){
+  const datas = lerDatas();
+  return `
+  <div class="label">
+    <div class="top-header">
+      <span class="brand-title">MEL SÃO JOSÉ</span>
+    </div>
+
+    <div class="middle-row">
+      <div class="prod-name">${prod.nome}</div>
+      <div class="right-header-info">
+        ${numPedido ? `<div class="order-info">PEDIDO/NF-E: ${numPedido}</div>` : ''}
+        <div class="box-info">CAIXA COM ${String(qtdPorCaixa).padStart(2,'0')} UNI</div>
+        <div class="dates-info">
+          SEPARAÇÃO: ${datas.sep || '__/__/____'}<br>
+          IMPRESSÃO: ${datas.imp}
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-row">
+      <div class="left-tags">
+        ${prod.peso ? `<div class="weight-text">${prod.peso}</div>` : ''}
+        ${prod.variacao ? `<div class="variant-box${prod.variacao.length > 16 ? ' long' : ''}">${prod.variacao}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="barcode-section">
+        ${eanSvg(prod.ean)}
+        <div class="barcode-number">${prod.ean}</div>
+      </div>
+      <div class="sequence-section">
+        <div class="sequence-title">Caixas do produto:</div>
+        <div class="sequence-number">${numero}/${total}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function imprimirProduto(index){
+  const prod = produtosBase[index];
+  const qtdInput = document.getElementById(`qtd-${index}`);
+  const qtd = Math.max(1, parseInt(qtdInput.value) || 1);
+  const pedidoInput = document.getElementById('pedido').value.trim();
+
+  let qtdPorCaixa = prod.cx;
+  if (prod.variavel) {
+    const cxInput = document.getElementById(`cx-${index}`);
+    if (cxInput) {
+      qtdPorCaixa = Math.max(1, parseInt(cxInput.value) || 1);
+    }
+  }
+
+  let html = '';
+  for(let i = 1; i <= qtd; i++){
+    html += criarEtiqueta(prod, i, qtd, pedidoInput, qtdPorCaixa);
+  }
+
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = html;
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      window.print();
+    }, 250);
+  });
+}
+
+function imprimirSelecionados(){
+  const pedidoInput = document.getElementById('pedido').value.trim();
+  let temSelecionado = false;
+  let todasEtiquetas = [];
+
+  document.querySelectorAll('.product-checkbox:checked').forEach((checkbox, posicao) => {
+    const row = checkbox.closest('.product-row');
+    const index = Array.from(document.querySelectorAll('.product-checkbox')).indexOf(checkbox);
+    const prod = produtosBase[index];
+    
+    const qtdInput = row.querySelector(`input[id^="qtd-"]`);
+    const qtd = Math.max(1, parseInt(qtdInput.value) || 1);
+
+    let qtdPorCaixa = prod.cx;
+    const cxInput = row.querySelector(`input[id^="cx-"]`);
+    if (cxInput) {
+      qtdPorCaixa = Math.max(1, parseInt(cxInput.value) || 1);
+    }
+
+    for(let i = 1; i <= qtd; i++){
+      todasEtiquetas.push({prod, i, qtd, pedidoInput, qtdPorCaixa});
+    }
+    temSelecionado = true;
+  });
+
+  if (!temSelecionado) {
+    alert('Por favor, selecione pelo menos um produto para imprimir.');
+    return;
+  }
+
+  const printArea = document.getElementById('printArea');
+  const totalEtiquetas = todasEtiquetas.length;
+  let htmlGerado = '';
+  let processadas = 0;
+  const CHUNK_SIZE = 50; /* Processa 50 de uma vez */
+
+  function processarChunk() {
+    const fim = Math.min(processadas + CHUNK_SIZE, totalEtiquetas);
+    
+    for(let i = processadas; i < fim; i++){
+      const {prod, i: numero, qtd, pedidoInput, qtdPorCaixa} = todasEtiquetas[i];
+      htmlGerado += criarEtiqueta(prod, numero, qtd, pedidoInput, qtdPorCaixa);
+    }
+    
+    processadas = fim;
+
+    if(processadas < totalEtiquetas) {
+      /* Continua processando próximo chunk */
+      setTimeout(processarChunk, 10);
+    } else {
+      /* Acabou! Renderiza e imprime */
+      printArea.innerHTML = htmlGerado;
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          window.print();
+        }, 250);
+      });
+    }
+  }
+
+  /* Inicia processamento */
+  processarChunk();
+}
+
+inicializarDatas();
+renderLista();
+</script>
+</body>
+</html>
