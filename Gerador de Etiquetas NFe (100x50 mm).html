@@ -47,41 +47,12 @@
             font-size: 14px;
         }
 
-        .control-item input[type="number"],
-        .control-item input[type="text"] {
+        .control-item input[type="number"] {
+            width: 80px;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
-        }
-
-        .control-item input[type="number"] {
-            width: 80px;
-        }
-
-        .control-item input[type="text"] {
-            width: 230px;
-        }
-
-        .destinatario-manual-box {
-            background: #fafafa;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-
-        .destinatario-manual-box h3 {
-            margin-top: 0;
-            font-size: 15px;
-            color: #333;
-        }
-
-        .manual-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
         }
 
         .btn-print {
@@ -120,16 +91,11 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            overflow: hidden;
-            break-after: page;
             page-break-after: always;
+            overflow: hidden;
         }
 
-        .etiqueta-wrapper:last-child {
-            break-after: auto;
-            page-break-after: auto;
-        }
-
+        /* Bloco Destinatário / Remetente */
         .bloco {
             font-size: 8pt;
             line-height: 1.15;
@@ -152,6 +118,7 @@
             font-size: 8pt;
         }
 
+        /* Código de barras */
         .barcode-container {
             text-align: center;
             margin-top: -1mm;
@@ -176,23 +143,18 @@
                 margin: 0;
             }
 
-            html, body {
-                width: 100mm;
-                height: 50mm;
+            body {
                 background: none;
                 padding: 0;
                 margin: 0;
             }
 
-            .no-print,
-            #btn-voltar-hub-bottom {
+            .no-print {
                 display: none !important;
             }
 
             #container-etiquetas {
                 display: block;
-                margin: 0;
-                padding: 0;
             }
 
             .etiqueta-wrapper {
@@ -201,15 +163,8 @@
                 height: 50mm;
                 margin: 0;
                 padding: 2mm 4mm;
-                break-inside: avoid;
-                page-break-inside: avoid;
-                break-after: page;
                 page-break-after: always;
-            }
-
-            .etiqueta-wrapper:last-child {
-                break-after: auto;
-                page-break-after: auto;
+                page-break-inside: avoid;
             }
 
             .linha-divisoria {
@@ -223,7 +178,7 @@
     <!-- PAINEL DE CONTROLE (Não sai na impressão) -->
     <div class="no-print">
         <h2>Gerador de Etiquetas NFe (100x50 mm)</h2>
-        <p>Selecione os arquivos XML ou digite o destinatário manualmente:</p>
+        <p>Selecione os arquivos XML e a quantidade de cópias:</p>
         
         <div class="control-group">
             <div class="control-item">
@@ -232,114 +187,22 @@
             </div>
 
             <div class="control-item">
-                <label for="copiesInput">Cópias:</label>
+                <label for="copiesInput">Cópias por XML:</label>
                 <input type="number" id="copiesInput" value="1" min="1" max="100">
             </div>
 
             <button class="btn-print" onclick="window.print()">🖨️ Imprimir Etiquetas</button>
-        </div>
-
-        <!-- Opção de Digitação Manual do Destinatário com Busca CEP -->
-        <div class="destinatario-manual-box">
-            <h3>Destinatário Manual (Opcional / Sobrescreve ou Adiciona)</h3>
-            <div class="manual-row">
-                <div class="control-item">
-                    <label>Nome:</label>
-                    <input type="text" id="manualNome" placeholder="Nome do Destinatário" style="width: 280px;">
-                </div>
-                <div class="control-item">
-                    <label>CEP:</label>
-                    <input type="text" id="manualCep" placeholder="00000-000" maxlength="9" style="width: 130px;">
-                </div>
-            </div>
-            <div class="manual-row">
-                <div class="control-item">
-                    <label>Logradouro (Rua/Av):</label>
-                    <input type="text" id="manualLgr" placeholder="Ex: Rua das Flores" style="width: 250px;">
-                </div>
-                <div class="control-item">
-                    <label>Número:</label>
-                    <input type="text" id="manualNro" placeholder="Ex: 123" style="width: 90px;">
-                </div>
-                <div class="control-item">
-                    <label>Complemento:</label>
-                    <input type="text" id="manualCpl" placeholder="Ex: Apto 42" style="width: 120px;">
-                </div>
-            </div>
-            <div class="manual-row">
-                <div class="control-item">
-                    <label>Bairro:</label>
-                    <input type="text" id="manualBairro" placeholder="Nome do Bairro" style="width: 180px;">
-                </div>
-                <div class="control-item">
-                    <label>Cidade / UF:</label>
-                    <input type="text" id="manualMunUF" placeholder="Ex: São Paulo - SP" style="width: 180px;">
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- ÁREA ONDE AS ETIQUETAS SERÃO GERADAS -->
     <div id="container-etiquetas"></div>
 
-    <a href="./index.html" id="btn-voltar-hub-bottom">← Voltar ao Hub</a>
-
-    <style>
-      #btn-voltar-hub-bottom {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background-color: #1e293b;
-        color: #38bdf8;
-        border: 1px solid #334155;
-        padding: 10px 18px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-family: system-ui, -apple-system, sans-serif;
-        font-size: 14px;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        transition: all 0.2s ease;
-        z-index: 9999;
-      }
-      #btn-voltar-hub-bottom:hover {
-        background-color: #38bdf8;
-        color: #0f172a;
-        border-color: #38bdf8;
-        transform: translateY(-2px);
-      }
-    </style>
-
     <script>
         const xmlInput = document.getElementById('xmlInput');
         const copiesInput = document.getElementById('copiesInput');
-        const manualCepInput = document.getElementById('manualCep');
 
-        manualCepInput.addEventListener('blur', function() {
-            let cepLimpo = manualCepInput.value.replace(/\D/g, '');
-            if (cepLimpo.length === 8) {
-                fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.erro) {
-                            document.getElementById('manualLgr').value = data.logradouro || '';
-                            document.getElementById('manualBairro').value = data.bairro || '';
-                            document.getElementById('manualMunUF').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('manualNro').focus();
-                            gerarEtiquetas();
-                        } else {
-                            alert('CEP não encontrado.');
-                        }
-                    })
-                    .catch(() => {});
-            }
-        });
-
-        const manualInputs = ['manualNome', 'manualCep', 'manualLgr', 'manualNro', 'manualCpl', 'manualBairro', 'manualMunUF'];
-        manualInputs.forEach(id => {
-            document.getElementById(id).addEventListener('input', gerarEtiquetas);
-        });
-
+        // Atualiza a visualização se o usuário trocar os arquivos ou alterar a quantidade de cópias
         xmlInput.addEventListener('change', gerarEtiquetas);
         copiesInput.addEventListener('input', gerarEtiquetas);
 
@@ -347,39 +210,7 @@
             const files = xmlInput.files;
             const copies = parseInt(copiesInput.value) || 1;
             const container = document.getElementById('container-etiquetas');
-            container.innerHTML = ''; 
-
-            const mNome = document.getElementById('manualNome').value.trim();
-            const mLgr = document.getElementById('manualLgr').value.trim();
-            const mNro = document.getElementById('manualNro').value.trim();
-            const mCpl = document.getElementById('manualCpl').value.trim();
-            const mBairro = document.getElementById('manualBairro').value.trim();
-            const mMunUF = document.getElementById('manualMunUF').value.trim();
-            let mCep = document.getElementById('manualCep').value.trim();
-            if (mCep.length === 8) {
-                mCep = mCep.replace(/^(\d{5})(\d{3})$/, "$1-$2");
-            }
-
-            const temManual = mNome !== '' || mCep !== '' || mLgr !== '';
-
-            if (files.length === 0 && temManual) {
-                for (let c = 0; c < copies; c++) {
-                    const barcodeId = `barcode-manual-${c}`;
-                    renderizarEtiqueta(container, {
-                        nNFFormatted: "000000",
-                        destNome: mNome || "DESTINATÁRIO",
-                        destLgr: mLgr,
-                        destNro: mNro,
-                        destCpl: mCpl,
-                        destBairro: mBairro,
-                        destMunUF: mMunUF,
-                        destCEP: mCep,
-                        emitNome: "EMITENTE NÃO INFORMADO",
-                        emitLgr: "-", emitNro: "", emitCpl: "", emitBairro: "", emitMun: "", emitUF: "", emitCEP: ""
-                    }, barcodeId);
-                }
-                return;
-            }
+            container.innerHTML = ''; // Limpa etiquetas anteriores
 
             if (files.length === 0) return;
 
@@ -391,37 +222,33 @@
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
+                    // Função auxiliar para buscar tags ignorando namespace
                     const getNodeValue = (parent, tagName) => {
                         const el = parent ? parent.getElementsByTagName(tagName)[0] : null;
                         return el ? el.textContent.trim() : '';
                     };
 
+                    // Extrair Número da NF-e (nNF)
                     let nNF = getNodeValue(xmlDoc, 'nNF') || '000000';
                     let nNFFormatted = nNF.padStart(6, '0');
 
+                    // --- DESTINATÁRIO ---
                     const destNode = xmlDoc.getElementsByTagName('dest')[0];
+                    const destNome = getNodeValue(destNode, 'xNome');
                     const destEnder = destNode ? destNode.getElementsByTagName('enderDest')[0] : null;
                     
-                    let destNome = (mNome !== '') ? mNome : getNodeValue(destNode, 'xNome');
-                    let destLgr = (mLgr !== '') ? mLgr : getNodeValue(destEnder, 'xLgr');
-                    let destNro = (mNro !== '') ? mNro : getNodeValue(destEnder, 'nro');
-                    let destCpl = (mCpl !== '') ? mCpl : getNodeValue(destEnder, 'xCpl');
-                    let destBairro = (mBairro !== '') ? mBairro : getNodeValue(destEnder, 'xBairro');
-                    
-                    let destMunUF = '';
-                    if (mMunUF !== '') {
-                        destMunUF = mMunUF;
-                    } else {
-                        const destMun = getNodeValue(destEnder, 'xMun');
-                        const destUF = getNodeValue(destEnder, 'UF');
-                        destMunUF = `${destMun} - ${destUF}`;
-                    }
-
-                    let destCEP = (mCep !== '') ? mCep : getNodeValue(destEnder, 'CEP');
+                    const destLgr = getNodeValue(destEnder, 'xLgr');
+                    const destNro = getNodeValue(destEnder, 'nro');
+                    const destCpl = getNodeValue(destEnder, 'xCpl');
+                    const destBairro = getNodeValue(destEnder, 'xBairro');
+                    const destMun = getNodeValue(destEnder, 'xMun');
+                    const destUF = getNodeValue(destEnder, 'UF');
+                    let destCEP = getNodeValue(destEnder, 'CEP');
                     if (destCEP.length === 8) {
                         destCEP = destCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
 
+                    // --- REMETENTE (EMITENTE) ---
                     const emitNode = xmlDoc.getElementsByTagName('emit')[0];
                     const emitNome = getNodeValue(emitNode, 'xNome');
                     const emitEnder = emitNode ? emitNode.getElementsByTagName('enderEmit')[0] : null;
@@ -437,73 +264,89 @@
                         emitCEP = emitCEP.replace(/^(\d{5})(\d{3})$/, "$1-$2");
                     }
 
+                    // Loop para criar o número de cópias solicitado
                     for (let c = 0; c < copies; c++) {
                         const barcodeId = `barcode-${fileIndex}-${c}`;
-                        renderizarEtiqueta(container, {
-                            nNFFormatted,
-                            destNome,
-                            destLgr,
-                            destNro,
-                            destCpl,
-                            destBairro,
-                            destMunUF,
-                            destCEP,
-                            emitNome,
-                            emitLgr,
-                            emitNro,
-                            emitCpl,
-                            emitBairro,
-                            emitMun: `${emitMun} - ${emitUF}`,
-                            emitCEP
-                        }, barcodeId);
+
+                        const htmlEtiqueta = `
+                            <div class="etiqueta-wrapper">
+                                <!-- BLOCO DESTINATÁRIO -->
+                                <div class="bloco">
+                                    <div class="titulo">DESTINATÁRIO</div>
+                                    <div class="nome">${destNome}</div>
+                                    <div class="endereco">
+                                        ${destLgr}, nº ${destNro} ${destCpl ? '- ' + destCpl : ''}<br>
+                                        ${destBairro} - ${destMun} - ${destUF}<br>
+                                        Cep: ${destCEP}
+                                    </div>
+                                    <div class="barcode-container">
+                                        <svg id="${barcodeId}"></svg>
+                                    </div>
+                                </div>
+
+                                <div class="linha-divisoria"></div>
+
+                                <!-- BLOCO REMETENTE -->
+                                <div class="bloco">
+                                    <div class="titulo">REMETENTE</div>
+                                    <div class="nome">${emitNome}</div>
+                                    <div class="endereco">
+                                        ${emitLgr}, nº ${emitNro} ${emitCpl ? '- ' + emitCpl : ''}<br>
+                                        ${emitBairro} - ${emitMun} - ${emitUF}<br>
+                                        Cep: ${emitCEP}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        container.insertAdjacentHTML('beforeend', htmlEtiqueta);
+
+                        // Gerar o código de barras
+                        JsBarcode(`#${barcodeId}`, nNFFormatted, {
+                            format: "CODE128",
+                            width: 1.8,
+                            height: 35,
+                            displayValue: true,
+                            fontSize: 10,
+                            margin: 2
+                        });
                     }
                 };
 
                 reader.readAsText(file);
             });
         }
-
-        function renderizarEtiqueta(container, dados, barcodeId) {
-            const htmlEtiqueta = `
-                <div class="etiqueta-wrapper">
-                    <div class="bloco">
-                        <div class="titulo">DESTINATÁRIO</div>
-                        <div class="nome">${dados.destNome}</div>
-                        <div class="endereco">
-                            ${dados.destLgr}, nº ${dados.destNro} ${dados.destCpl ? '- ' + dados.destCpl : ''}<br>
-                            ${dados.destBairro} - ${dados.destMunUF}<br>
-                            Cep: ${dados.destCEP}
-                        </div>
-                        <div class="barcode-container">
-                            <svg id="${barcodeId}"></svg>
-                        </div>
-                    </div>
-
-                    <div class="linha-divisoria"></div>
-
-                    <div class="bloco">
-                        <div class="titulo">REMETENTE</div>
-                        <div class="nome">${dados.emitNome}</div>
-                        <div class="endereco">
-                            ${dados.emitLgr}, nº ${dados.emitNro} ${dados.emitCpl ? '- ' + dados.emitCpl : ''}<br>
-                            ${dados.emitBairro} - ${dados.emitMun}<br>
-                            Cep: ${dados.emitCEP}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            container.insertAdjacentHTML('beforeend', htmlEtiqueta);
-
-            JsBarcode(`#${barcodeId}`, dados.nNFFormatted, {
-                format: "CODE128",
-                width: 1.8,
-                height: 35,
-                displayValue: true,
-                fontSize: 10,
-                margin: 2
-            });
-        }
     </script>
+<!-- Botão Voltar (Canto Inferior Esquerdo) -->
+<a href="./index.html" id="btn-voltar-hub-bottom">
+  &larr; Voltar ao Hub
+</a>
+
+<style>
+  #btn-voltar-hub-bottom {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #1e293b;
+    color: #38bdf8;
+    border: 1px solid #334155;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s ease;
+    z-index: 9999;
+  }
+
+  #btn-voltar-hub-bottom:hover {
+    background-color: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+  }
+</style>
 </body>
 </html>
